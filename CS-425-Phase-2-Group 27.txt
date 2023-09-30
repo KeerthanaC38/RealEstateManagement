@@ -1,0 +1,165 @@
+create table Agent(
+	email varchar(30),
+	name varchar(30) NOT NULL,
+	agency varchar(20) NOT NULL,
+	contact char(12) UNIQUE,
+	job_title varchar(20),
+	password varchar(40),
+	primary key(email)
+);
+
+create table Agent_address(
+	email varchar(30),
+	address varchar(50),
+	primary key (email,address),
+	password varchar(40),
+	foreign key (email) references Agent
+);
+
+create table Perspective_renter(
+	email varchar(30),
+	name varchar(30) NOT NULL,
+	budget varchar(8) NOT NULL ,
+	preferred_location varchar(30) NOT NULL,
+	move_in_date date NOT NULL,
+	primary key(email)
+);
+
+create table Perspective_renter_address(
+	email varchar(30),
+	address varchar(50),
+	primary key (email,address),
+	foreign key (email) references Perspective_renter
+);
+
+create table Renter_card_address(
+	email varchar(30),
+	credit_card char(16),
+	payment_address varchar(50) NOT NULL,
+	primary key(email,credit_card),
+	foreign key (email) references Perspective_renter
+);
+
+create table Property(
+	property_id int,
+	primary key(property_id)
+);
+
+create table House(
+	property_id int,
+	type varchar(20) NOT NULL,
+	description varchar(100) NOT NULL,
+	square_footage numeric(6,2) NOT NULL,
+	availability char(3) NOT NULL,-- Either Yes or No
+	price varchar(20) NOT NULL,
+	location varchar(20) NOT NULL,
+	city varchar(15),
+	state varchar(15),
+	number_of_rooms int NOT NULL,
+	email varchar(30),
+	rental_start_date date,
+	rental_end_date date,
+	primary key(property_id),
+	foreign key (property_id) references Property,
+	foreign key (email) references Agent
+);
+
+create table Apartment(
+	property_id int,
+	type varchar(20) NOT NULL,
+	description varchar(100) NOT NULL,
+	square_footage numeric(6,2) NOT NULL,
+	availability char(3) NOT NULL,-- Either Yes or No
+	price varchar(20) NOT NULL,
+	location varchar(20) NOT NULL,
+	city varchar(15),
+	state varchar(15),
+	number_of_rooms int NOT NULL,
+	building_type varchar(20) NOT NULL,
+	email varchar(30),
+	rental_start_date date,
+	rental_end_date date,
+	primary key(property_id),
+	foreign key (property_id) references Property,
+	foreign key (email) references Agent
+);
+
+create table Commercial_building(
+	property_id int,
+	type varchar(20) NOT NULL,
+	description varchar(100) NOT NULL,
+	square_footage numeric(6,2) NOT NULL,
+	availability char(3) NOT NULL,-- Either Yes or No
+	price varchar(20) NOT NULL,
+	location varchar(20) NOT NULL,
+	city varchar(15),
+	state varchar(15),
+	type_of_business varchar(20) NOT NULL,
+	email varchar(30),
+	rental_start_date date,
+	rental_end_date date,
+	primary key(property_id),
+	foreign key (property_id) references Property,
+	foreign key (email) references Agent
+);
+
+
+create table Additional_properties(
+	property_id int,
+	crime_rate char(6),
+	school char(3), --Either Yes or No
+	primary key(property_id,crime_rate,school),
+	foreign key (property_id) references Property
+);
+
+create table Neighbourhood(
+	property_id int,
+	crime_rate char(6),
+	school char(3),
+	land varchar(20),
+	vacation_home char(3),
+	primary key(property_id,crime_rate,school,land,vacation_home),
+	foreign key (property_id,crime_rate,school) references Additional_properties
+);
+
+create table Reward_program(
+	email varchar(30),
+	program_id int,
+	reward_point_count float,
+	primary key(email,program_id,reward_point_count),
+	foreign key(email) references Perspective_renter
+);
+
+
+create table books(
+	email varchar(30),
+	property_id int,
+	credit_card char(16),
+	primary key(email,property_id,credit_card),
+	foreign key(email, credit_card) references Renter_card_address,
+	foreign key(property_id) references Property
+);
+
+create table makes_points(
+	email varchar(30),
+	property_id int,
+	credit_card char(16),
+	program_id int,
+	reward_point_count float,
+	primary key(email,property_id,credit_card,program_id,reward_point_count),
+	foreign key(email,property_id,credit_card) references books,
+	foreign key(email,program_id,reward_point_count) references Reward_program(email,program_id,reward_point_count)
+);
+
+create index House_location on House(location);
+create index Apartment_location on Apartment(location);
+create index Commercial_building_location on Commercial_building(location);
+create index House_start_date on House(rental_start_date,availability);
+create index Apartment_start_date on Apartment(rental_start_date,availability);
+create index Commercial_building_start_date on Commercial_building(rental_start_date,availability);
+create index House_bedrooms on House(number_of_rooms);
+create index Apartment_bedrooms on Apartment(number_of_rooms);
+create index House_price_range on House(price);
+create index Apartment_price_range on Apartment(price);
+create index Commercial_building_price_range on Commercial_building(price);
+create index View_bookings on books(email,property_id);
